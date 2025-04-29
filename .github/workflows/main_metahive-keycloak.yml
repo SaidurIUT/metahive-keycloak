@@ -1,41 +1,45 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy container app to Azure Web App - metahive-keycloak
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: 'ubuntu-latest'
+
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-      
-    - name: Log in to Azure Container Registry
+
+    - name: Log in to registry
       uses: docker/login-action@v2
       with:
-        registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-        
+        registry: https://metahiveregistry.azurecr.io/
+        username: ${{ secrets.AzureAppService_ContainerUsername_3b405a2e26b344c9bb5e119aa6d28110 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_987d21f8fa5047979ebbe8e0f44f714c }}
+
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
-        context: .
         push: true
-        tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/metahive-keycloak:${{ github.sha }}
+        tags: metahiveregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_3b405a2e26b344c9bb5e119aa6d28110 }}/metahive-keycloak:${{ github.sha }}
         file: ./Dockerfile
-        
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
     steps:
     - name: Deploy to Azure Web App
       id: deploy-to-webapp
@@ -43,5 +47,5 @@ jobs:
       with:
         app-name: 'metahive-keycloak'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_84a4dfaac55e40eeb7db76afae7d988d }}
-        images: '${{ secrets.REGISTRY_LOGIN_SERVER }}/metahive-keycloak:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_d57514697a824946baac86bb265c09a9 }}
+        images: 'metahiveregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_3b405a2e26b344c9bb5e119aa6d28110 }}/metahive-keycloak:${{ github.sha }}'
