@@ -5,9 +5,9 @@ COPY ./docker/keycloak/themes/ /opt/keycloak/themes/
 COPY ./docker/keycloak/realms/ /opt/keycloak/data/import/
 
 # Set environment variables
+# Password should be configured in Azure App Service settings for better security
 ENV KC_HTTP_PORT=8181 \
-    KEYCLOAK_ADMIN=admin \
-    KEYCLOAK_ADMIN_PASSWORD=admin
+    KEYCLOAK_ADMIN=admin
 
 # Expose the port
 EXPOSE 8181
